@@ -1,15 +1,13 @@
 import "./styles/styles.scss";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+
 const _ = require("lodash");
-//TODO:
-// 1. Dodać ikonę plusa
-// 2. Przekminić jak wyświetlać zagnieżdżoną tabelę
 
 window.onload = () => {
   getAPIAsync("users").then(users => {
     getAPIAsync("companies").then(companies => {
-      companies = parseData(companies, users);
-      loadTableWithData(companies);
+      let parsedCompanies = parseData(companies, users);
+      loadTableWithData(parsedCompanies);
     });
   });
 };
@@ -44,11 +42,20 @@ function loadTableWithData(data) {
 
   let rowNo = 1;
   _.map(data, function(d) {
-    tableHtml += `<tr>
-                    <th scope="row">${rowNo}</th>
+    tableHtml += `<tr data-toggle="collapse" data-target=".comapny-${rowNo}">
+                    <th scope="row">
+                      <i class="fa fa-plus-square" id="icon"></i>${rowNo}
+                    </th>
                     <td>${d.name}</td>
                     <td>${d.userCount}</td>
                   </tr>`;
+    _.map(d.users, function(u) {
+      tableHtml += `<tr class="collapse comapny-${rowNo}">
+                      <th scope="row"></th>
+                      <td>${u.name}</td>
+                      <td>${u.email}</td>
+                    </tr>`;
+    });
     rowNo += 1;
   });
 
