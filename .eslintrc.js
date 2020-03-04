@@ -9,6 +9,10 @@ module.exports = {
   "parserOptions": {
     "sourceType": "module"
   },
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module"
+  },
   "rules": {
     "indent": [
       "error",

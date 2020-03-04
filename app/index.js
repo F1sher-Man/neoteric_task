@@ -1,35 +1,32 @@
-import "./styles/styles.scss";
-import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-
-const _ = require("lodash");
+import './styles/styles.scss';
+import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import { filter, map, orderBy } from 'lodash';
 
 window.onload = () => {
-  getAPIAsync("users").then(users => {
-    getAPIAsync("companies").then(companies => {
-      let parsedCompanies = parseData(companies, users);
+  fetchCompaniesData('users').then(users => {
+    fetchCompaniesData('companies').then(companies => {
+      let parsedCompanies = parseCompaniesWithUsers(companies, users);
       loadTableWithData(parsedCompanies);
     });
   });
 };
 
-async function getAPIAsync(param) {
-  let response = await fetch(`http://localhost:3000/${param}`);
-  let data = await response.json();
-  return data;
+async function fetchCompaniesData(param) {
+  return fetch(`http://localhost:3000/${param}`).then(data => data.json());
 }
 
-function parseData(companies, users) {
-  _.map(companies, function(company) {
-    company.users = _.filter(users, function(user) {
+function parseCompaniesWithUsers(companies, users) {
+  map(companies, function (company) {
+    company.users = filter(users, function (user) {
       return company.uri === user.uris.company;
     });
     company.userCount = company.users.length;
   });
-  companies = _.orderBy(companies, "userCount", "asc");
+  companies = orderBy(companies, 'userCount', 'asc');
   return companies;
 }
 
-function loadTableWithData(data) {
+function loadTableWithData(companies) {
   let tableHtml = `<table class="table">
   <thead class="thead-dark">
     <tr>
@@ -41,19 +38,19 @@ function loadTableWithData(data) {
   <tbody>`;
 
   let rowNo = 1;
-  _.map(data, function(d) {
+  companies.forEach(company => {
     tableHtml += `<tr data-toggle="collapse" data-target=".comapny-${rowNo}">
                     <th scope="row">
                       <i class="fa fa-plus-square" id="icon"></i>${rowNo}
                     </th>
-                    <td>${d.name}</td>
-                    <td>${d.userCount}</td>
+                    <td>${company.name}</td>
+                    <td>${company.userCount}</td>
                   </tr>`;
-    _.map(d.users, function(u) {
+    company.users.forEach(user => {
       tableHtml += `<tr class="collapse comapny-${rowNo}">
                       <th scope="row"></th>
-                      <td>${u.name}</td>
-                      <td>${u.email}</td>
+                      <td>${user.name}</td>
+                      <td>${user.email}</td>
                     </tr>`;
     });
     rowNo += 1;
@@ -62,6 +59,6 @@ function loadTableWithData(data) {
   tableHtml += `</tbody>
               </table>`;
 
-  var tableContener = document.getElementById("table-content");
+  let tableContener = document.getElementById('table-content');
   tableContener.innerHTML = tableHtml;
 }
